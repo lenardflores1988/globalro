@@ -1,0 +1,299 @@
+function	script	autopothp	{
+disable_items;
+//	setarray .blackList[0],11502,12075,12080,12085,12090,12095,12100;
+	setarray .hpwhitelist[0],11501,504,547,11503,11548,502,599,501,545,598,13531,569;
+	setarray .spwhitelist[0],11502,505;
+	setarray .tele[0],601,12887;
+	function	___onoff	;
+	function ___onoffAT 	;
+	function ___pots;
+	function	___onoffBasicAttack;
+	function	___TELEonoff;
+	.@SP_BOT_NA = 1;
+	.@hppots = 0;
+	.@sppots = 0;
+	while(1)
+	{
+	set .@menu$, ___onoffAT(@at) +":"+ ___pots() +":^00FF00HP below "+ @HP_BOT +"%^000000 ["+getitemname(@HP_POTS)+"]:^000088SP below "+ @SP_BOT +"%^000000 ["+getitemname(@SP_POTS)+"]:"+___TELEonoff(@TELE_BOT)+":Autoattack^ff0000[Logout]^000000:"+___onoff(@WALK_BOT)+":Cancel";
+
+
+	switch(select(.@menu$)) {
+	
+	case 1:
+		switch(select("ON:OFF:"+___onoffBasicAttack(@basic)+":Add MobID:Remove MobID:Reset MobID:List"))	{
+                    case 1:
+                        atcommand "@autoattack on";
+                        set @at, 1;
+                        end;
+                    case 2:
+                        atcommand "@autoattack off";
+                        set @at, 0;
+                        end;
+                    case 4:
+                        if (@at == 1) {
+                            dispbottom "Cannot add Mob ID while autoattack is ON.";
+                        } else {
+                            input .mob_id;
+                            atcommand "@autoattack +" + .mob_id;
+                        }
+                        break;
+                    case 5:
+                        if (@at == 1) {
+                            dispbottom "Cannot remove Mob ID while autoattack is ON.";
+                        } else {
+                            input .mob_id;
+                            atcommand "@autoattack -" + .mob_id;
+                        }
+                        break;
+                    case 6:
+                        if (@at == 1) {
+                            dispbottom "Cannot reset Mob IDs while autoattack is ON.";
+                        } else {
+                            atcommand "@autoattack reset";
+							dispbottom "All target monsters have been removed from the list.";
+                        }
+                        break;	
+                    case 7:
+                        atcommand "@autoattack list";
+                        break;
+                    case 3:
+                        switch (@BASICATTACK_BOT) {
+                            case 0:
+                                set @BASICATTACK_BOT, 1;
+                                set @basic, 1;
+                                dispbottom "Basic Attack turned ON";
+                                break;
+                            case 1:
+                                set @BASICATTACK_BOT, 0;
+                                set @basic, 0;
+                                dispbottom "Basic Attack turned OFF";
+                                break;
+                            default:
+                                break;
+                        }
+                        break;
+                    default:
+                        dispbottom "autoattack ERROR";
+                        break;
+                }
+                break;
+	case 2:
+		if(checkoption(0x80000000) == 0){
+		mes "How to use auto pots?","[TAB 2]","slot1-Concentration/Awakes/Berserk","slot2-Agi Scroll","slot3-Bless Scroll","slot4-STRfood","slot5-AGIfood","slot6-VITfood","slot7-INTfood","slot8-DEXfood","slot9-LUKfood","[Extra Slots]","slot1-HP Potion","slot2-SP Potion";
+		
+		cutin "autopots.bmp", 4;	
+		close2;
+		cutin "",255;
+		}
+		
+		atcommand "@autopots";
+		
+		break;
+	case 3:
+		//clear;
+			if (.@hppots == 0){
+			getinventorylist;
+			for(.@i = 0;.@i < @inventorylist_count;.@i++){
+				if (getiteminfo(@inventorylist_id[.@i], ITEMINFO_TYPE) == IT_HEALING && inarray(.hpwhitelist,@inventorylist_id[.@i]) != -1) {
+					.@items[.@count] = @inventorylist_id[.@i];
+					.@menu2$ = .@menu2$ + sprintf("~ ^0055FF%s^000000 (%dx)" + (inarray(.blackList[0],@inventorylist_id[.@i]) != -1? " ^364022Black Listed^000000":"") + (BaseLevel < getiteminfo(@inventorylist_id[.@i], ITEMINFO_EQUIPLEVELMIN)? " ^E82C0CNeed Higher Level^000000":"") + ":", getitemname(@inventorylist_id[.@i]), countitem(@inventorylist_id[.@i]));
+					.@count++;
+				}
+			}
+			.@hppots++;
+			}
+					//clear;
+			if(.@count){
+				mes "[ Auto-Potion ]";
+				mes "Select HP recovery item.";
+				.@select = select(.@menu2$ + "   ^777777Cancel^000000") - 1;
+				set @HP_POTS , .@items[.@select];
+				dispbottom "[Autopots HP] "+getitemname(@HP_POTS);
+				//.@items[.@select]
+			//	break;
+				}
+			else{
+				message strcharinfo(0), "There are no HP healing items in your inventory.";
+				break;
+			}
+		mes "Use HP recovery when HP below n%?";
+		switch(select("50%:75%:90%:Cancel")) {
+		case 1: 
+			set @HP_BOT, 50;
+			break;
+		case 2: 
+			set @HP_BOT, 75;
+			break;
+		case 3: 
+			set @HP_BOT, 90;
+			break;
+		default:
+			end;
+			}
+
+		break;
+	case 4:
+	if (.@sppots == 0){
+			getinventorylist;
+			for(.@i = 0;.@i < @inventorylist_count;.@i++){
+				if (getiteminfo(@inventorylist_id[.@i], ITEMINFO_TYPE) == IT_HEALING && inarray(.spwhitelist,@inventorylist_id[.@i]) != -1) {
+					.@items3[.@count3] = @inventorylist_id[.@i];
+					.@menu3$ = .@menu3$ + sprintf("~ ^0055FF%s^000000 (%dx)" + (inarray(.blackList[0],@inventorylist_id[.@i]) != -1? " ^364022Black Listed^000000":"") + (BaseLevel < getiteminfo(@inventorylist_id[.@i], ITEMINFO_EQUIPLEVELMIN)? " ^E82C0CNeed Higher Level^000000":"") + ":", getitemname(@inventorylist_id[.@i]), countitem(@inventorylist_id[.@i]));
+					.@count3++;
+				}
+			}
+			.@sppots++;
+			}
+			if(.@count3){
+				mes "[ Auto-Potion ]";
+				mes "Select SP recovery item.";
+				.@select3 = select(.@menu3$ + "   ^777777Cancel^000000") - 1;
+				set @SP_POTS , .@items3[.@select3];
+				dispbottom "[Autopots SP] "+getitemname(@SP_POTS);
+				//.@items[.@select]
+				//break;
+				}
+			else{
+				message strcharinfo(0), "There are no SP healing items in your inventory.";
+				break;
+			}
+		switch(select("50%:75%:90%:Cancel")) {
+		case 1: 
+			set @SP_BOT, 50;
+			break;
+		case 2: 
+			set @SP_BOT, 75;
+			break;
+		case 3: 
+			set @SP_BOT, 90;
+			break;
+		default:
+			end;
+			}
+
+		break;
+	case 5:
+		switch(select("Fly Wing:Skill:Off:Cancel")) {
+		case 1: 
+			if(!countitem(601) && !rentalcountitem(12887))
+				dispbottom "You don't have Fly Wing on your inventory";	
+
+			if(rentalcountitem(12887))
+				set @FLY_WING, 12887;
+			else 
+				set @FLY_WING, 601;
+				
+			set @TELE_BOT, 1;
+				
+			break;
+		case 2: 
+			if(!getskilllv(26)){
+			dispbottom "You don't have Teleport skill.";
+			set @TELE_BOT, 0;
+			break;
+			}
+			set @TELE_BOT, 2;
+			break;
+		case 3: 
+			set @TELE_BOT, 0;
+			break;
+		default:
+			break;
+			}
+			break;
+	case 7:
+	//switch(select("On:Off")) {
+		if (/*select("ON","OFF")==1 && */@WALK_BOT == 1){
+			set @WALK_BOT, 0;
+		//	set @DIST_BOT, 9;
+			break;
+			}
+		else{
+			//.@eac = eaclass();
+			set @WALK_BOT, 1;
+
+			/*if ((.@eac&EAJ_BASEMASK) == EAJ_SWORDMAN || (.@eac&EAJ_BASEMASK) == EAJ_THIEF || (.@eac&EAJ_BASEMASK) == EAJ_MERCHANT){
+			set @DIST_BOT, 9;
+			}*/
+			break;
+			}
+//		default:
+			break;
+//			break;
+	//		}
+	case 6:
+		if (vip_status(VIP_STATUS_ACTIVE) || getgmlevel()==99) {
+			atcommand "@afk";
+			end;
+		}
+		else{
+		dispbottom "You don't have VIP status active.";
+		end;
+		}
+	default:
+			end;
+			}
+
+//break;
+
+//end;
+	}
+	
+	end;
+	
+	function ___pots {
+		if(checkoption(0x80000000) == 1)
+		return "Autopots ^00FF00[ON]^000000";
+		
+		else
+			return "Autopots ^FF0000[OFF]^000000";
+			}
+	function	___onoff	{
+		if(getarg(0) == 0)
+		return "Assist Mode ^FF0000[OFF]^000000";
+		
+		else
+			return "Assist Mode ^00FF00[ON]^000000";
+			
+	}
+	function	___TELEonoff	{
+		if(getarg(0) == 0)
+		return "Auto Tele ^FF0000[OFF]^000000";
+		
+		else
+			return "Auto Tele ^00FF00[ON]^000000";
+			
+	}
+	function	___onoffAT	{
+	
+
+		if(getarg(0) == 0)
+		return "Autoattack ^FF0000[OFF]^000000";
+		
+		else
+			return "Autoattack ^00FF00[ON]^000000";
+			
+	}
+	function	___onoffBasicAttack	{
+		if(getarg(0) == 0)
+		return "Basicattack ^00FF00[ON]^000000";
+		
+		else
+			return "Basicattack ^000088[OFF]^000000";
+			
+	}
+
+/*
+OnInit:
+	setarray .@blackList[0],11501;
+
+	setarray .@spwhitelist[0],11502;
+	end;*/
+
+}
+
+-	script	autoattackdied	-1,{
+OnPCDieEvent:
+	atcommand "@autoattack off";
+	end;
+}

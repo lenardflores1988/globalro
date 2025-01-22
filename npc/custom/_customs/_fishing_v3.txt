@@ -1,0 +1,237 @@
+
+new_zone01,62,126,6	script	Fishing System#trader	4_M_MERCAT1,{
+
+mes "I will trade your delicious fish for Nyangvine Fruit.";
+end;
+}
+new_zone01,66,115,6	script	Fishing System#11	2_BOARD1,{
+mes	"Mapflag notrade";
+close;
+OnInit:
+	waitingroom "Fishing System",0;
+}
+/*
+prontera,149,184,6	script	Daily Fisherman#11	1_M_01,{
+mes "Go to fishing site?";
+switch(select("Yes:No")){     
+case 1:     
+mes "[Fisherman]";          
+warp "new_zone01",67,112;         
+break;     
+case 2:
+mes "Ok, good bye then."; 
+break;
+}
+close;
+end;
+}*/
+
+prontera,165,151,4	script	Daily Fisherman#11	4_CAT_SAILOR5,{
+mes "Go to fishing site?";
+switch(select("> Yes:> No:> Information"))	{
+case 1:
+	disable_items;
+	if (BaseLevel < 50)	{	
+				mes "You need to be atleast level 50.";
+				end;
+				}
+	if (checkweight(25271,1) == 0 || (MaxWeight - Weight) < 1000) {
+		mes "- You're carrying too many items to proceed with this quest. -";
+		close;
+	}
+	if (#fishing == 0)
+	{
+						if (isequipped(2764) && isequipped(2775))	
+							{
+							//(isequipped(1699))
+							//equip 1699;
+							//equip 5031;
+							warp "new_zone01",67,112;         
+							//set $mining, $mining-1;		you use you daily mining
+							end;
+							}
+						else if (rentalcountitem(2764) >0 || rentalcountitem(2775) > 0)
+						{
+							mes "Please kindly put on your fishing equipments for you safety.";
+						}
+						else
+							{
+							mes "You are done fishing for today. Come back tomorrow.";
+							end;
+							}
+}
+else if (#fishing > 0)
+	{
+					rentitem(2764,600);
+					rentitem(2775,600);
+					equip 2764;		
+					equip 2775;
+							warp "new_zone01",67,112;         
+					set #fishing, #fishing -1;
+					end;
+
+	}
+else
+	mes "Something went wrong please report to admin. This is and error.","Thank you.";
+	end;
+
+case 2:
+	mes "Goodbye then.";
+	end;
+	
+case 3:
+	mes "Fishing site.";
+	next;
+	mes "You have 10 minutes per day. You can reenter as long as your rod and lure are not yet expired.";
+	end;
+default:
+	mes "Something went wrong.","Please report to admin.";
+	end;
+
+
+
+}
+
+OnInit:
+	showscript("< Fishing >");
+	questinfo(QTYPE_DAILYQUEST,QMARK_YELLOW, "#fishing > 0 && BaseLevel > 49" );
+	initnpctimer;
+	end;
+OnTimer4000:
+	showscript("< Fishing >");
+	setnpctimer 0;
+	end;
+}
+
+//===========================================
+-	script	Fishing Hole	-1,{
+/*if (.busy>0) {
+mes "NPC is busy now.";
+end;
+}*/
+    Fish:
+        if(!isequipped(.rod) || !isequipped(.lure)) {
+            dispbottom("[Fishing] You need a Rod and Lure.");
+            end;
+        }
+		set .busy,1;
+		//attachrid (getcharid(0));
+        specialeffect(EF_BUBBLE, "Fishing Hole");
+        soundeffect("_attack_rod.wav", 0);
+       // dispbottom("[Fishing] Casting...");
+  		unittalk getcharid(3), "[Fishing] Casting.";
+			   sleep2 100;
+		unittalk getcharid(3), "[Fishing] Casting..";
+	   sleep2 100;
+	   unittalk getcharid(3), "[Fishing] Casting...";
+	   sleep2 100;	 
+       	 progressbar("ffffff", .@fishing_cast_time+rand(5));
+
+
+
+        
+        .@fishing_cast_time = .default_fishing_cast_time;
+        for(.@i = 0; .@i < getarraysize(.fishing_items); .@i += 2)
+            if (isequipped(.fishing_items[.@i]))
+                .@fishing_cast_time += .fishing_items[.@i + 1];
+
+		//random skill shrimp or tuna party
+		//skilleffect "SU_TUNAPARTY",1;
+		//itemskill "SU_SHRIMPARTY",1;
+		//skilleffect 249,1;
+		//atcommand "@useskill 5039 1 ASSASSIN";
+//delitem(.lure, 1);
+
+        .@pull = rand(1, 100);
+        .@catch = 0;
+        .@chance = 0;
+
+        for(.@i = 0; .@i < 3; .@i++) {
+            .@chance += .chances[.@i];
+
+            if(.@pull <= .@chance) {
+                switch(.@i) {
+                    case 0:
+                        .@catch = .rare_catches[rand(getarraysize(.rare_catches))];
+                        mapannounce(strcharinfo(3), strcharinfo(0) + " has caught a " + getitemname(.@catch) + "!", bc_map, "0x33CC00");
+                        break;
+                    case 1:
+                        .@catch = .blueback;
+                        mapannounce(strcharinfo(3), strcharinfo(0) + " has caught a "+getitemname(.blueback), bc_map, "0xff77ff");
+                        break;
+                    case 2:
+                        .@catch = .normal_catches[rand(getarraysize(.normal_catches))];
+                        break;
+                }
+                
+                break;
+            }
+        }
+
+        if(.@catch == 0) {
+            dispbottom("[Fishing] Nothing was caught...");
+            specialeffect EF_TEMP_FAIL,SELF;
+
+            if(.auto_fail == 1)
+                goto Fish;
+       //     set .busy,1;
+            end;
+        }
+
+        getitem(.@catch, 1);
+        specialeffect EF_TEMP_OK,SELF;
+        specialeffect2 457;
+         //   set .busy,1;
+			//	set .v, getvariableofnpc(.var,"TargetNPC");
+        if(.auto == 1  && isequipped(2764) && isequipped(2775)) 
+            goto Fish;
+        
+        end;
+
+    OnInit:
+	//	initnpctimer;
+
+        // Fishing rod
+        .rod = 2764;
+
+        // Fishing Lure
+        .lure = 2775;
+        
+        // Auto-Fish
+        .auto = 1;
+        
+        // Auto-Fish on Fail
+        .auto_fail = 1;
+
+        // Default Cast Time 
+        .default_fishing_cast_time = 10;
+
+        // Chances for catch rareties: <rare>, <blueback>, <normal>
+        // All chances together can't exceed 100.
+        // If all chances sum up to 100, fishing doesn't fail. 
+        setarray(.chances[0], 1, 39, 59);
+
+        // Fishing Items
+        setarray(.fishing_items, 2550, -2, 2443, -2, 2764, -3, 2775, -1);
+
+        // Blueback
+        .blueback = 6771;//6899 giant octopus
+
+        // Catches
+        setarray(.normal_catches[0], 579, 908, 963, 6049, 624, 7631,6563);
+
+        // Rare Catches
+        setarray(.rare_catches[0] ,6096, 644, 603, 617,6777,6775,6901,6774,6773,6772);
+	//	end;
+/*OnTimer10000:
+	//showscript("Fish");
+		    set .busy,0;
+	setnpctimer 0;*/
+//	end;
+}
+
+//==============
+new_zone01,74,127,4	duplicate(Fishing Hole)	Fishing Hole#2	4_SHOAL
+new_zone01,74,123,4	duplicate(Fishing Hole)	Fishing Hole#3	4_SHOAL
+new_zone01,75,132,4	duplicate(Fishing Hole)	Fishing Hole#4	4_SHOAL
+

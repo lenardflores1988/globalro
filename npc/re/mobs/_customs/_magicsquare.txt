@@ -1,0 +1,5 @@
+//hero_ent1,0,0	monster	Magic Square Guardian#1		1286,5,5000
+//hero_ent1,0,0	monster	Magic Square Guardian#2	1285,10,5000
+//hero_ent1,0,0	monster	Magic Square Guardian#3	1829,10,5000
+//hero_ent1,0,0	monster	Magic Square Guardian#4	1287,50,5000
+hero_ent1,176,139,8,8	monster	Magic Square Guardian#4	1287,5,5000

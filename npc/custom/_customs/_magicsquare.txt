@@ -1,0 +1,169 @@
+hero_ent1	mapflag	nosave	SavePoint
+hero_ent1	mapflag	nowarp
+hero_ent1	mapflag	nowarpto
+//hero_ent1	mapflag	noteleport
+hero_ent1	mapflag	nomemo
+hero_ent1	mapflag	nopenalty
+hero_ent1	mapflag	nobranch
+hero_ent1	mapflag	noicewall
+//hero_ent1	mapflag	noskill
+//hero_ent1	mapflag	hidemobhpbar
+//hero_ent1	mapflag	noitemconsumption
+//hero_ent1	mapflag	noexp
+
+//INVISIBLE WALL
+hero_ent1,0,0,0	script	magicsquare#WALL	-1,{ 
+end;
+OnInIt:
+	setcell "hero_ent1",160,137,161,142,cell_walkable,0;
+	setcell "hero_ent1",160,137,161,142,cell_shootable,0;
+}
+
+prontera,165,159,4	script	Magic Square	4_DST_SOLDIER,{ 
+mes "Do you want to enter Magic Square?";
+next;
+switch(select("> Yes:> No:> Information"))	{
+case 1:
+	disable_items;
+	if (BaseLevel < 50)	{	
+				mes "You need to be atleast level 50.";
+				end;
+				}
+	if (checkweight(25271,1) == 0 || (MaxWeight - Weight) < 1000) {
+		mes "- You're carrying too many items to proceed with this quest. -";
+		close;
+	}
+	if (#magicsquare == 0)
+	{
+		if (isequipped(7514))
+			{
+			warp "hero_ent1",0,0;
+			end;
+			}
+		else if (rentalcountitem(7514) >0)
+		{
+			equip 7514;	
+			warp "hero_ent1",0,0;
+		}
+		else
+			{
+			mes "You are finished for today. Come back tomorrow.";
+			end;
+			}
+}
+else if (#magicsquare > 0)
+	{
+	rentitem (7514,600);
+	equip 7514;		
+	warp "hero_ent1",0,0;
+	set #magicsquare, #magicsquare -1;
+	end;
+	}
+else
+	mes "Something went wrong please report to admin. This is and error.","Thank you.";
+	end;
+
+case 2:
+	mes "Goodbye then.";
+	end;
+	
+case 3:
+	mes "Magic Square is full of unique monsters that drop special items like:","-Miracle Tonic (1mil Base Exp)","-Food Buffs (+10 stats)","-Battle Manual","-Bubble Gum";
+	next;
+	mes "You have 10 minutes per day. You can reenter the dungeon as long as your ticket has not yet expired.";
+	end;
+default:
+	mes "Something went wrong.","Please report to admin.";
+	end;
+end;
+}
+
+OnInit:
+	questinfo(QTYPE_DAILYQUEST,QMARK_YELLOW, "#magicsquare > 0 && BaseLevel > 49");// || rentalcountitem(7514) >0 " );
+//.j = 0;
+	showscript("< Magic Square >");
+	initnpctimer;
+	end;  
+
+OnTimer5000:
+	showscript("< Magic Square >");
+	setnpctimer 0;
+	end;
+}
+/*
+if(#magicsquare == 1 || getgroupid(getcharid(0))==99)		
+{ 
+	rentitem (7514,60000);
+	warp "hero_ent1",285,29;
+	set #magicsquare, #magicsquare -1 ;
+	end;
+}
+else
+{
+	if (rentalcountitem(7514) == 1)
+	{
+		warp "hero_ent1",285,40;
+		end;
+	}
+	mes "[Magic Square]";   
+	mes "You don't have entry left.";
+	mes "Come back again tomorrow.";
+	close;         
+	end;
+}*/
+/*
+
+hero_ent1,370,31,4	script	1#itemcheck1	-1,{ 
+
+OnEnable:
+	areawarp "hero_ent1",150,150,371,32,"hero_ent1",0,0;
+	end;
+OnTimer6000:
+	stopnpctimer;
+	donpcevent "1#itemcheck1::OnEnable";
+	end;
+OnEnable:
+	initnpctimer;
+	enablenpc "1#itemcheck1";
+	end;
+OnStop:
+	disablenpc "1#itemcheck1";
+	stopnpctimer;
+	end;
+}
+
+*/
+/*
+hero_ent1,285,29,4	script	1#itemcheck1	-1,30,30,{ 
+//	startnpctimer #itemcheck1;
+
+function		__touch;
+function		__touch	{
+	OnTouch_:
+	OnInit_:		
+	{
+	if(rentalcountitem(7514)==0)
+	warp "SavePoint",0,0;
+	end;
+	}
+}
+}*/
+/*
+OnInit:
+	initnpctimer;
+	end;  
+
+OnTimer1000:
+	setnpctimer 0;
+	end;
+}*/
+/*
+-scriptAnnoying Announcer-1,{ 
+OnInit:     
+initnpctimer;     
+end; 
+OnTimer1000:     
+announce "I'm very annoying.",bc_all;     
+setnpctimer, 0;     
+end; 
+}*/

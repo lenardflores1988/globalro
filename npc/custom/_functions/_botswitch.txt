@@ -1,0 +1,89 @@
+-	script	bot_at	-1,{
+	function	__onoff	;
+OnInit:
+	bindatcmd "potson",strnpcinfo(3)+"::OnDo";
+	bindatcmd "potsoff",strnpcinfo(3)+"::OnDo2";
+	bindatcmd "potsend",strnpcinfo(3)+"::OnDo2";
+	end;
+OnDo:
+if (checkoption(0x80000000) == 1) //off
+	atcommand "@autopots";
+	.@SP_BOT_NA = 1;
+	while(1)
+	{
+		.@C = select("[Finish]","HP/SP","[Cancel]","Autopots "+__onoff(.@SP_BOT_NA));
+		if( .@C == 1 )
+			break;
+		else if( .@C == 2 )
+			switch(select("HP:SP")){
+			case 1:
+				switch(select("90%:75%:50%:Cancel")) {
+								case 1: 
+									set @HP_BOT, 90;
+									break;
+								case 2: 
+									set @HP_BOT, 75;
+									break;
+								case 3: 
+									set @HP_BOT, 50;
+									break;
+								default:
+									break;
+									}
+				break;
+			case 2:
+			
+					switch(select("90%:75%:50%:Cancel")) {
+						case 1: 
+							set @SP_BOT, 90;
+							break;
+						case 2: 
+							set @SP_BOT, 75;
+							break;
+						case 3: 
+							set @SP_BOT, 50;
+							break;
+						default:
+							break;
+							}
+			
+			break;
+			}
+		else if( .@C == 3 )
+			close;
+		else
+			switch(.@C)
+			{
+				case 3:
+					.@SP_BOT_NA = !.@SP_BOT_NA;
+					break;
+			}
+	}
+	message strcharinfo(0),"RUN";
+	/*if( .@C == 1 || .@C > 2 )
+	{
+		mes "OK";
+		close2;
+	}*/
+	
+	atcommand "@autopots";
+
+	.@v = checkoption(0x80000000);
+	dispbottom(.@v + " SCBOT value");
+	dispbottom(.@SP_BOT_NA + " SP value");
+	end;
+OnDo2:
+if (checkoption(0x80000000) == 1) //off
+	atcommand "@autopots";
+	
+	dispbottom(.@v$);
+	dispbottom(.@SP_BOT_NA + " SP value");
+	message strcharinfo(0),"END";
+	end;
+	function	__onoff	{
+		if(getarg(0) == 0)
+		return "^BEBEBE[OFF]^000000";
+		else
+			return "^000088[ON]^000000";
+	}
+}

@@ -1,0 +1,7 @@
+prontera,149,127,4	script	#signnovend	2_BULLETIN_BOARD,{
+mes "^ff0000NOTICE:^000000 No vending at this point";
+end;
+OnInit:
+	waitingroom "No Vending",0;
+	end;
+}
